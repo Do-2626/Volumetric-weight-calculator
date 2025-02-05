@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volume Weight Calculator</title>
+    <style>
+        /* تصميم الصفحة الرئيسية */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        /* تصميم حاوية النموذج */
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* تصميم مجموعة المدخلات */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        /* تصميم علامات التسمية */
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* تصميم مربعات الإدخال والقوائم المنسدلة */
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* تصميم الزر */
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* تغيير لون الزر عند مرور المؤشر */
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* تصميم نتائج الحساب */
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- حاوية النموذج -->
+    <div class="container">
+        <h1>حاسبة وزن الحجم</h1>
+        <!-- نموذج الحساب -->
+        <form id="calculatorForm">
+            <!-- مجموعة المدخلات للأبعاد -->
+            <div class="input-group">
+                <label for="length">الطول (L):</label>
+                <input type="number" id="length" required>
+                <select id="unit">
+                    <option value="cm">CM</option>
+                    <option value="inch">Inch</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="width">العرض (W):</label>
+                <input type="number" id="width" required>
+            </div>
+            <div class="input-group">
+                <label for="height">الارتفاع (H):</label>
+                <input type="number" id="height" required>
+            </div>
+            <div class="input-group">
+                <label for="weight">الوزن:</label>
+                <input type="number" id="weight" required>
+                <select id="weightUnit">
+                    <option value="kg">KG</option>
+                    <option value="pound">Pound</option>
+                </select>
+            </div>
+            <button type="submit">احسب</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('calculatorForm'); // الحصول على النموذج
+            const resultDiv = document.getElementById('result'); // الحصول على عنصر النتيجة
+
+            // عند النقر على زر الحساب
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // منع إرسال النموذج
+
+                // قراءة القيم المدخلة
+                const length = parseFloat(document.getElementById('length').value); // قراءة الطول
+                const width = parseFloat(document.getElementById('width').value); // قراءة العرض
+                const height = parseFloat(document.getElementById('height').value); // قراءة الارتفاع
+                const weight = parseFloat(document.getElementById('weight').value); // قراءة الوزن
+                const unit = document.getElementById('unit').value; // قراءة وحدة الأبعاد
+                const weightUnit = document.getElementById('weightUnit').value; // قراءة وحدة الوزن
+
+                // التحقق من صحة القيم المدخلة
+                const inputs = [length, width, height, weight];
+                if (inputs.some(input => isNaN(input) || input <= 0)) { // التحقق من وجود أرقام غير صالحة أو سالبة
+                    resultDiv.textContent = "يرجى إدخال أرقام صالحة وموجبة لجميع الحقول.";
+                    return;
+                }
+
+                // حساب الحجم
+                let volume = length * width * height; // حساب الحجم الأساسي
+                if (unit === 'inch') { // إذا كانت الوحدة إنش، يتم تحويلها إلى سنتيمترات
+                    volume *= 16.387064; // تحويل من بوصة مكعبة إلى سنتيمتر مكعب
+                }
+
+                // حساب وزن الحجم بوحدة الكيلوجرامات باستخدام المعامل 5000
+                let volumeWeightKg = volume / 5000;
+
+                // تحويل وزن الحجم إلى الرطل
+                let volumeWeightPound = volumeWeightKg * 2.20462;
+
+                // تحويل الوزن الفعلي إلى كيلوجرامات إذا كانت الوحدة رطل
+                let actualWeightKg = weight;
+                if (weightUnit === 'pound') {
+                    actualWeightKg *= 0.453592; // تحويل الرطل إلى كيلوجرام
+                }
+
+                // تحديد الوزن النهائي (الأكبر بين وزن الحجم والوزن الفعلي)
+                const finalWeightKg = Math.max(actualWeightKg, volumeWeightKg);
+
+                // تحويل الوزن النهائي إلى الرطل
+                const finalWeightPound = finalWeightKg * 2.20462;
+
+                // عرض النتائج
+                resultDiv.innerHTML = `
+                    <p><strong>وزن الحجم (كجم):</strong> ${volumeWeightKg.toFixed(2)} كجم</p>
+                    <p><strong>وزن الحجم (رطل):</strong> ${volumeWeightPound.toFixed(2)} رطل</p>
+                    <p><strong>الوزن الفعلي (كجم):</strong> ${actualWeightKg.toFixed(2)} كجم</p>
+                    <p><strong>الوزن النهائي (كجم):</strong> ${finalWeightKg.toFixed(2)} كجم</p>
+                    <p><strong>الوزن النهائي (رطل):</strong> ${finalWeightPound.toFixed(2)} رطل</p>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
